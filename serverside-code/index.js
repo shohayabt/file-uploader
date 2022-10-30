@@ -17,7 +17,8 @@ const upload = multer({ // it will return a middleware
 app.get("/",(req,res)=>{
     res.send("Hello Programmer")
 })
-app.post("/upload", upload.single('profilePicture'), (req,res)=>{
+app.post("/upload", upload.fields([{name:'profilePicture', maxCount : 1 },{name:'coverPhoto', maxCount : 1 }]
+    ), (req,res)=>{
     res.json({"status":"successfull"})
 })
 app.listen(port,()=>{
