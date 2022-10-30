@@ -1,16 +1,28 @@
 const express = require("express");
 const multer = require("multer")
 const app = express();
+const path = require('path')
 const port = 3000 || 5000
 
-
-app.use(express.json())
-
 // LocalFileSystem 
-const UPLOAD_FOLDER =  './uploads/';
+const UPLOAD_FOLDER =  './uploads';
+app.use(express.json())
+// Disk Storage 
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null,UPLOAD_FOLDER )
+      },
+    filename: (req,file,cb)=>{
+        const fileName = file.originalname
+        const fileExt = path.extname(fileName)
+        const newFileName = fileName.replace(fileExt," ").toLowerCase().split(" ").join("-") + "-" + Date.now()
+        cb(null, newFileName + fileExt)
+    }
+})
+
 // multer workstation
 const upload = multer({ // it will return a middleware 
-    dest: UPLOAD_FOLDER,
+    storage:storage,
     limits:{
         fileSize:300000, // 300KB
     },
@@ -20,7 +32,7 @@ const upload = multer({ // it will return a middleware
         ){
             cb(null,true)
         }else{
-            cb('Only png file is allowed')
+            cb(new Error("only png file allowed"))
         }
     }
 })
@@ -30,7 +42,7 @@ app.get("/",(req,res)=>{
     res.send("Hello Programmer")
 })
 app.post("/upload", upload.single("profilePicture"), (req,res)=>{
-    res.json({"status":"successfull"})
+    res.send(req.file)
 })
 
 
